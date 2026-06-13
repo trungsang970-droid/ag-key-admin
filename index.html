@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Offline Key Admin</title>
+<style>
+body{font-family:Arial;background:#0f172a;color:#fff;padding:20px}
+.box{max-width:700px;margin:auto;background:#1e293b;padding:20px;border-radius:12px}
+input,button{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:none}
+button{cursor:pointer}
+.hidden{display:none}
+.key{background:#334155;padding:10px;border-radius:8px;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="box">
+<div id="login">
+<h2>Đăng nhập Admin</h2>
+<input id="pw" type="password" placeholder="Nhập mật khẩu">
+<button onclick="login()">Đăng nhập</button>
+<p id="msg"></p>
+</div>
+
+<div id="admin" class="hidden">
+<h2>Quản lý Key</h2>
+<input id="days" type="number" value="30" min="1" placeholder="Số ngày hiệu lực">
+<button onclick="createKey()">Tạo Key</button>
+<div id="list"></div>
+</div>
+</div>
+
+<script>
+const PASSWORD="AGBFUV12";
+
+function login(){
+  const v=document.getElementById('pw').value.trim().toUpperCase();
+  if(v===PASSWORD){
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('admin').classList.remove('hidden');
+  }else{
+    document.getElementById('msg').innerText='Sai mật khẩu!';
+  }
+}
+
+document.getElementById('pw').addEventListener('keydown',e=>{
+ if(e.key==='Enter') login();
+});
+
+function createKey(){
+ const days=document.getElementById('days').value||30;
+ const key='KEY-'+Math.random().toString(36).substring(2,10).toUpperCase();
+ const d=new Date();
+ d.setDate(d.getDate()+parseInt(days));
+ const div=document.createElement('div');
+ div.className='key';
+ div.innerHTML='<b>'+key+'</b><br>Hiệu lực: '+days+' ngày<br>Hết hạn: '+d.toLocaleDateString('vi-VN');
+ document.getElementById('list').prepend(div);
+}
+</script>
+</body>
+</html>
