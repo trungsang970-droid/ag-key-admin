@@ -2,61 +2,303 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Offline Key Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AG-KEY-ADMIN PRO</title>
+
 <style>
-body{font-family:Arial;background:#0f172a;color:#fff;padding:20px}
-.box{max-width:700px;margin:auto;background:#1e293b;padding:20px;border-radius:12px}
-input,button{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:none}
-button{cursor:pointer}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{
+background:#03150a;
+color:#fff;
+padding:20px;
+}
+.box{
+max-width:850px;
+margin:auto;
+background:#072412;
+border:2px solid #00ff66;
+border-radius:20px;
+padding:20px;
+box-shadow:0 0 30px #00ff66;
+}
+h1,h2{
+text-align:center;
+color:#00ff66;
+margin:15px;
+}
+input,select,button{
+width:100%;
+padding:12px;
+margin:7px 0;
+border:none;
+border-radius:10px;
+font-size:16px;
+}
+button{
+background:#00ff66;
+font-weight:bold;
+cursor:pointer;
+}
 .hidden{display:none}
-.key{background:#334155;padding:10px;border-radius:8px;margin-top:8px}
+.card{
+background:#0d331b;
+border:1px solid #00ff66;
+padding:12px;
+margin-top:10px;
+border-radius:10px;
+}
 </style>
 </head>
+
 <body>
+
 <div class="box">
+
 <div id="login">
-<h2>Đăng nhập Admin</h2>
-<input id="pw" type="password" placeholder="Nhập mật khẩu">
-<button onclick="login()">Đăng nhập</button>
+
+<h1>👑 AG-KEY-ADMIN PRO</h1>
+
+<input id="password"
+type="password"
+placeholder="Nhập mật khẩu ADMIN">
+
+<button onclick="login()">
+ĐĂNG NHẬP
+</button>
+
 <p id="msg"></p>
+
 </div>
 
-<div id="admin" class="hidden">
-<h2>Quản lý Key</h2>
-<input id="days" type="number" value="30" min="1" placeholder="Số ngày hiệu lực">
-<button onclick="createKey()">Tạo Key</button>
+
+<div id="panel" class="hidden">
+
+<h2>🚀 MÁY CHỦ TẠO KEY</h2>
+
+<h3>
+📊 Tổng KEY:
+<span id="count">0</span>
+</h3>
+
+<select id="days">
+<option value="1">1 NGÀY</option>
+<option value="7">7 NGÀY</option>
+<option value="30">30 NGÀY</option>
+<option value="90">90 NGÀY</option>
+<option value="99999">VĨNH VIỄN</option>
+</select>
+
+<button onclick="createKey()">
+🔑 TẠO KEY
+</button>
+
+<input id="search"
+placeholder="🔍 Tìm KEY"
+onkeyup="showKeys()">
+
 <div id="list"></div>
+
 </div>
+
 </div>
+
 
 <script>
+
 const PASSWORD="AGBFUV12";
 
+let keys =
+JSON.parse(localStorage.getItem("AG_KEYS"))
+|| [];
+
+
 function login(){
-  const v=document.getElementById('pw').value.trim().toUpperCase();
-  if(v===PASSWORD){
-    document.getElementById('login').classList.add('hidden');
-    document.getElementById('admin').classList.remove('hidden');
-  }else{
-    document.getElementById('msg').innerText='Sai mật khẩu!';
-  }
+
+let pw =
+document.getElementById("password")
+.value.toUpperCase();
+
+
+if(pw===PASSWORD){
+
+document.getElementById("login")
+.classList.add("hidden");
+
+document.getElementById("panel")
+.classList.remove("hidden");
+
+showKeys();
+
+}else{
+
+document.getElementById("msg")
+.innerHTML="❌ Sai mật khẩu";
+
 }
 
-document.getElementById('pw').addEventListener('keydown',e=>{
- if(e.key==='Enter') login();
-});
+}
+
 
 function createKey(){
- const days=document.getElementById('days').value||30;
- const key='KEY-'+Math.random().toString(36).substring(2,10).toUpperCase();
- const d=new Date();
- d.setDate(d.getDate()+parseInt(days));
- const div=document.createElement('div');
- div.className='key';
- div.innerHTML='<b>'+key+'</b><br>Hiệu lực: '+days+' ngày<br>Hết hạn: '+d.toLocaleDateString('vi-VN');
- document.getElementById('list').prepend(div);
+
+let days =
+document.getElementById("days")
+.value;
+
+
+let key =
+"AG-" +
+Math.random()
+.toString(36)
+.substring(2,8)
+.toUpperCase();
+
+
+keys.unshift({
+key:key,
+days:days,
+status:"🟡 Chưa sử dụng",
+created:new Date()
+.toLocaleString("vi-VN")
+});localStorage.setItem(
+"AG_KEYS",
+JSON.stringify(keys)
+);
+
+showKeys();
+
 }
+
+
+
+function deleteKey(index){
+
+if(confirm("Bạn có muốn xóa KEY này?")){
+
+keys.splice(index,1);
+
+localStorage.setItem(
+"AG_KEYS",
+JSON.stringify(keys)
+);
+
+showKeys();
+
+}
+
+}
+
+
+
+function lockKey(index){
+
+if(keys[index].status==="🔴 Đã khóa"){
+
+keys[index].status=
+"🟡 Chưa sử dụng";
+
+}else{
+
+keys[index].status=
+"🔴 Đã khóa";
+
+}
+
+
+localStorage.setItem(
+"AG_KEYS",
+JSON.stringify(keys)
+);
+
+showKeys();
+
+}
+
+
+
+function showKeys(){
+
+let search =
+document.getElementById("search")
+.value
+.toUpperCase();
+
+
+let html = "";
+
+
+keys.forEach((k,index)=>{
+
+
+if(k.key.includes(search)){
+
+
+html += `
+
+<div class="card">
+
+<b>
+🔑 ${k.key}
+</b>
+
+<br><br>
+
+⏳ Thời hạn:
+${k.days=="99999"
+?"Vĩnh viễn"
+:k.days+" ngày"}
+
+<br><br>
+
+📅 Ngày tạo:
+${k.created}
+
+<br><br>
+
+📌 Trạng thái:
+${k.status}
+
+<br><br>
+
+
+<button onclick="lockKey(${index})">
+
+${k.status==="🔴 Đã khóa"
+?"🟢 MỞ KHÓA"
+:"🔒 KHÓA KEY"}
+
+</button>
+
+
+<button onclick="deleteKey(${index})">
+
+🗑 XÓA KEY
+
+</button>
+
+
+</div>
+
+`;
+
+}
+
+});
+
+
+document.getElementById("list")
+.innerHTML = html;
+
+
+document.getElementById("count")
+.innerText = keys.length;
+
+
+}
+
+
 </script>
+
 </body>
+
 </html>
